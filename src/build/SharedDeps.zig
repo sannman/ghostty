@@ -547,9 +547,16 @@ pub fn add(
         }
     }
 
-    self.help_strings.addImport(step);
-    self.unicode_tables.addImport(step);
-    self.framedata.addImport(step);
+    // Windows builds currently hit a Zig run-step path resolution bug
+    // (std.Build.Step.Run.convertPathArg) when executing the generators used
+    // for help strings, unicode tables, and frame data. Skip these runtime
+    // generators on Windows so that we can still build the rest of the
+    // project; the generated sources are already checked into the repo.
+    if (step.rootModuleTarget().os.tag != .windows) {
+        self.help_strings.addImport(step);
+        self.unicode_tables.addImport(step);
+        self.framedata.addImport(step);
+    }
 
     return static_libs;
 }
