@@ -43,6 +43,15 @@ jobs:
           Write-Host "Zig installed."
           .\zig\zig.exe version
 
+      # The Zig cache occasionally ends up in a bad state on Windows which can
+      # surface as configure-phase read errors. Start from a clean cache for
+      # each job to keep builds reliable.
+      - name: Clean zig cache
+        shell: pwsh
+        run: |
+          Remove-Item -Recurse -Force ".\.zig-cache" -ErrorAction SilentlyContinue
+          Remove-Item -Recurse -Force ".\zig-out" -ErrorAction SilentlyContinue
+
       # Windows support is best-effort; continue-on-error keeps the workflow
       # running so that logs are always captured and uploaded.
       - name: Test Windows
@@ -76,4 +85,12 @@ jobs:
           path: |
             test.log
             build.log
+          if-no-files-found: ignore
+
+      - name: Upload build artifacts
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: windows-build-artifacts
+          path: zig-out/**
           if-no-files-found: ignore
