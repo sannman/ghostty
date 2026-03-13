@@ -86,3 +86,11 @@ jobs:
             test.log
             build.log
           if-no-files-found: ignore
+
+      - name: Upload build artifacts
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: windows-build-artifacts
+          path: zig-out/**
+          if-no-files-found: ignore
